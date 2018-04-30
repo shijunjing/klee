@@ -2992,7 +2992,28 @@ void Executor::callExternalFunction(ExecutionState &state,
     }
   }
 
+  // Prepare external memory for invocing the function
   state.addressSpace.copyOutConcretes();
+#ifndef WINDOWS
+  // Update external errno state with local state value
+  int *errno_addr = getErrnoLocation(state);
+  ObjectPair result;
+  bool resolved = state.addressSpace.resolveOne(
+      ConstantExpr::create((uint64_t)errno_addr, Expr::Int64), result);
+  if (!resolved)
+    klee_error("Could not resolve memory object for errno");
+  ref<Expr> errValueExpr = result.second->read(0, sizeof(*errno_addr) * 8);
+  ConstantExpr *errnoValue = dyn_cast<ConstantExpr>(errValueExpr);
+  if (!errnoValue) {
+    terminateStateOnExecError(state,
+                              "external call with errno value symbolic: " +
+                                  function->getName());
+    return;
+  }
+
+  externalDispatcher->setLastErrno(
+      errnoValue->getZExtValue(sizeof(*errno_addr) * 8));
+#endif
 
   if (!SuppressExternalWarnings) {
 
@@ -3012,6 +3033,7 @@ void Executor::callExternalFunction(ExecutionState &state,
     else
       klee_warning_once(function, "%s", os.str().c_str());
   }
+
   bool success = externalDispatcher->executeCall(function, target->inst, args);
   if (!success) {
     terminateStateOnError(state, "failed external call: " + function->getName(),
@@ -3792,6 +3814,17 @@ void Executor::prepareForEarlyExit() {
     statsTracker->done();
   }
 }
+
+/// Returns the errno location in memory
+int *Executor::getErrnoLocation(const ExecutionState &state) const {
+#ifndef __APPLE__
+  /* From /usr/include/errno.h: it [errno] is a per-thread variable. */
+  return __errno_location();
+#else
+  return __error();
+#endif
+}
+
 ///
 
 Interpreter *Interpreter::create(LLVMContext &ctx, const InterpreterOptions &opts,

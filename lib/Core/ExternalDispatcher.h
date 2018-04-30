@@ -42,6 +42,8 @@ public:
   void *resolveSymbol(const std::string &name);
 
   int getLastErrno();
+
+  void setLastErrno(int newErrno);
 };
 }
 

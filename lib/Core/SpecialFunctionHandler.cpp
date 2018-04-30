@@ -616,6 +616,7 @@ void SpecialFunctionHandler::handleErrnoLocation(
 #else
   int *errno_addr = nullptr;
 #endif
+
   executor.bindLocal(
       target, state,
       ConstantExpr::create((uint64_t)errno_addr,

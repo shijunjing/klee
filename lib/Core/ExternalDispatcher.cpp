@@ -74,6 +74,8 @@ public:
                    uint64_t *args);
   void *resolveSymbol(const std::string &name);
   int getLastErrno();
+  void setLastErrno(int newErrno);
+
 };
 
 std::string &ExternalDispatcherImpl::getFreshModuleID() {
@@ -255,6 +257,7 @@ bool ExternalDispatcherImpl::runProtectedCall(Function *f, uint64_t *args) {
   if (setjmp(escapeCallJmpBuf)) {
     res = false;
   } else {
+    errno = lastErrno;
     executionEngine->runFunction(f, gvArgs);
     // Explicitly acquire errno information
     lastErrno = errno;
@@ -354,6 +357,11 @@ Function *ExternalDispatcherImpl::createDispatcher(Function *target,
 
 int ExternalDispatcherImpl::getLastErrno() { return lastErrno; }
 
+void ExternalDispatcherImpl::setLastErrno(int newErrno) {
+  lastErrno = newErrno;
+}
+
+
 ExternalDispatcher::ExternalDispatcher(llvm::LLVMContext &ctx)
     : impl(new ExternalDispatcherImpl(ctx)) {}
 
@@ -369,4 +377,9 @@ void *ExternalDispatcher::resolveSymbol(const std::string &name) {
 }
 
 int ExternalDispatcher::getLastErrno() { return impl->getLastErrno(); }
+
+void ExternalDispatcher::setLastErrno(int newErrno) {
+  impl->setLastErrno(newErrno);
+}
+
 }
