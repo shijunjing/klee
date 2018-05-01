@@ -3050,13 +3050,13 @@ void Executor::callExternalFunction(ExecutionState &state,
 #ifndef WINDOWS
 #ifndef __APPLE__
   /* From /usr/include/errno.h: it [errno] is a per-thread variable. */
-  int *errno_addr = __errno_location();
+  errno_addr = __errno_location();
 #else
   int *errno_addr = __error();
 #endif
   // Update errno value explicitly
-  ObjectPair result;
-  bool resolved = state.addressSpace.resolveOne(
+  //ObjectPair result;
+  resolved = state.addressSpace.resolveOne(
       ConstantExpr::create((uint64_t)errno_addr, Expr::Int64), result);
   if (!resolved)
     klee_error("Could not resolve memory object for errno");
