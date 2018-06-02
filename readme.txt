@@ -29,7 +29,7 @@ $ git clone https://github.com/shijunjing/klee.git klee-fork
 $ git checkout edk2_enabling
 $ mkdir klee_build_dir
 $ cd klee_build_dir
-$ CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" CXXFLAGS="-fno-rtti" cmake \
+$ CXXFLAGS="-D_GLIBCXX_USE_CXX11_ABI=0" CXXFLAGS="-fno-rtti" CXXFLAGS="-g -O0" CFLAGS="-g -O0" cmake \
   -DENABLE_SOLVER_Z3=ON \
   -DENABLE_SOLVER_STP=OFF \
   -DENABLE_POSIX_RUNTIME=ON \
