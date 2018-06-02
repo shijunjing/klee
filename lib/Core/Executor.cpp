@@ -1758,7 +1758,8 @@ void Executor::executeInstruction(ExecutionState &state, KInstruction *ki) {
       break;
 
     if (isa<InlineAsm>(fp)) {
-      terminateStateOnExecError(state, "inline assembly is unsupported");
+      //just skip the inline assembly
+      //terminateStateOnExecError(state, "inline assembly is unsupported");
       break;
     }
     // evaluate arguments
