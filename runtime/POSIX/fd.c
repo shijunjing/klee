@@ -28,7 +28,6 @@
 #include <termios.h>
 #include <sys/select.h>
 #include <klee/klee.h>
-#include <sys/time.h>
 
 /* Returns pointer to the symbolic file structure fs the pathname is symbolic */
 static exe_disk_file_t *__get_sym_file(const char *pathname) {
